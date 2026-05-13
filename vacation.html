@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacation — Leah Mir</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Leaflet (free, open-source map library) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+
+  <!-- Gradient bar -->
+  <div class="gradient-bar"></div>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a href="index.html" class="site-nav__logo">Leah Mir</a>
+    <ul class="site-nav__links" id="nav-links"></ul>
+  </nav>
+
+  <!-- App layout: sidebar | map | detail -->
+  <div class="vacation-layout">
+
+    <!-- LEFT — vacation list + day list -->
+    <div class="v-sidebar">
+      <div class="v-sidebar__header">
+        <a href="index.html" class="v-sidebar__home">&larr; Home</a>
+        <p class="v-sidebar__title">Vacations</p>
+      </div>
+
+      <!-- Vacation list populated by JS -->
+      <ul class="v-vac-list" id="vac-list"></ul>
+
+      <!-- Day list — shown once a vacation is selected -->
+      <div class="v-day-section" id="day-section">
+        <p class="v-day-section__label" id="day-section-label"></p>
+        <ul id="day-list"></ul>
+      </div>
+    </div>
+
+    <!-- CENTER — map -->
+    <div class="v-map-area">
+      <div id="vacation-map"></div>
+    </div>
+
+    <!-- RIGHT — day detail -->
+    <div class="v-detail" id="v-detail">
+      <p class="v-detail__day-label" id="detail-day-label"></p>
+      <p class="v-detail__date"      id="detail-date"></p>
+      <h2 class="v-detail__title"   id="detail-title"></h2>
+      <div class="v-detail__rule"></div>
+      <p class="v-detail__notes"    id="detail-notes"></p>
+      <p class="v-detail__highlights-label">Highlights</p>
+      <ul class="v-detail__highlights" id="detail-highlights"></ul>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="site-config.js"></script>
+  <script src="vacations-data.js"></script>
+  <script>
+    /* Accent colors for map pins, cycling through the brand palette */
+    var PIN_COLORS = ['#2EC4B6', '#FF6FA8', '#74C69D', '#FFD43B'];
+
+    var map, currentMarkers = [], selectedVacId = null;
+
+    /* ── Build navigation ── */
+    var navEl = document.getElementById('nav-links');
+    SITE_CONFIG.sections.forEach(function (s) {
+      var li = document.createElement('li');
+      var a  = document.createElement('a');
+      a.href        = s.href;
+      a.textContent = s.title;
+      if (s.id === 'vacation') a.classList.add('active');
+      li.appendChild(a);
+      navEl.appendChild(li);
+    });
+
+    /* ── Init Leaflet map ── */
+    map = L.map('vacation-map', {
+      center:      [30, 10],
+      zoom:        2,
+      zoomControl: true
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    /* ── Build vacation list ── */
+    var vacListEl = document.getElementById('vac-list');
+    VACATIONS.forEach(function (v) {
+      var li  = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.className   = 'v-vac-item';
+      btn.dataset.id  = v.id;
+      btn.innerHTML   = v.title + '<span class="v-vac-item__year">' + v.year + '</span>';
+      btn.addEventListener('click', function () { selectVacation(v.id); });
+      li.appendChild(btn);
+      vacListEl.appendChild(li);
+    });
+
+    /* ── Select a vacation ── */
+    function selectVacation(id) {
+      selectedVacId = id;
+      var vac = VACATIONS.find(function (v) { return v.id === id; });
+      if (!vac) return;
+
+      /* Highlight selected vacation */
+      document.querySelectorAll('.v-vac-item').forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.id === id);
+      });
+
+      /* Show day section */
+      var daySection  = document.getElementById('day-section');
+      var dayList     = document.getElementById('day-list');
+      var dayLabel    = document.getElementById('day-section-label');
+      daySection.classList.add('visible');
+      dayLabel.textContent = vac.title;
+      dayList.innerHTML    = '';
+
+      vac.days.forEach(function (day) {
+        var li  = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.className      = 'v-day-item';
+        btn.dataset.day    = day.day;
+        btn.innerHTML      = '<span class="v-day-item__num">' + day.day + '</span>' + day.title;
+        btn.addEventListener('click', function () { selectDay(id, day.day); });
+        li.appendChild(btn);
+        dayList.appendChild(li);
+      });
+
+      /* Hide detail panel */
+      document.getElementById('v-detail').classList.remove('visible');
+
+      /* Drop markers for all days */
+      clearMarkers();
+      var bounds = [];
+      vac.days.forEach(function (day, i) {
+        var color  = PIN_COLORS[i % PIN_COLORS.length];
+        var marker = L.circleMarker([day.lat, day.lng], {
+          radius:      9,
+          fillColor:   color,
+          color:       '#fff',
+          weight:      2,
+          opacity:     1,
+          fillOpacity: 0.92
+        }).addTo(map);
+
+        marker.bindPopup('<b>Day ' + day.day + '</b><br>' + day.title);
+        marker.on('click', function () { selectDay(id, day.day); });
+        currentMarkers.push(marker);
+        bounds.push([day.lat, day.lng]);
+      });
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }
+
+    /* ── Select a day ── */
+    function selectDay(vacId, dayNum) {
+      var vac = VACATIONS.find(function (v) { return v.id === vacId; });
+      var day = vac.days.find(function (d)  { return d.day === dayNum; });
+      if (!day) return;
+
+      /* Highlight selected day in list */
+      document.querySelectorAll('.v-day-item').forEach(function (btn) {
+        btn.classList.toggle('active', parseInt(btn.dataset.day) === dayNum);
+      });
+
+      /* Fill detail panel */
+      document.getElementById('detail-day-label').textContent = 'Day ' + day.day;
+      document.getElementById('detail-date').textContent      = day.date || '';
+      document.getElementById('detail-title').textContent     = day.title;
+      document.getElementById('detail-notes').textContent     = day.notes || '';
+
+      var hiEl = document.getElementById('detail-highlights');
+      hiEl.innerHTML = '';
+      (day.highlights || []).forEach(function (h) {
+        var li = document.createElement('li');
+        li.textContent = h;
+        hiEl.appendChild(li);
+      });
+
+      /* Show panel */
+      document.getElementById('v-detail').classList.add('visible');
+
+      /* Pan and zoom map to this day's location */
+      map.setView([day.lat, day.lng], 13, { animate: true, duration: 0.8 });
+    }
+
+    /* ── Remove all markers ── */
+    function clearMarkers() {
+      currentMarkers.forEach(function (m) { map.removeLayer(m); });
+      currentMarkers = [];
+    }
+  </script>
+
+</body>
+</html>

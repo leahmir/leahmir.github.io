@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leah Mir</title>
+  <meta name="description" content="Leah Mir — Music educator, storyteller, digital garden.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Gradient bar (Turquoise → Yellow → Pink → Green) -->
+  <div class="gradient-bar"></div>
+
+  <!-- Navigation — built from site-config.js -->
+  <nav class="site-nav">
+    <a href="index.html" class="site-nav__logo">Leah Mir</a>
+    <ul class="site-nav__links" id="nav-links"></ul>
+  </nav>
+
+  <!-- Hero -->
+  <main class="page-wrap">
+    <section class="hero">
+      <p class="hero__eyebrow">Digital Garden</p>
+      <h1 class="hero__name" id="hero-name"></h1>
+      <span class="yellow-rule" style="margin-top:1.75rem;"></span>
+      <p class="hero__tagline" id="hero-tagline"></p>
+    </section>
+
+    <!-- Section cards — built from site-config.js -->
+    <p class="sections-label">The Garden</p>
+    <div class="section-grid" id="section-grid"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="gradient-bar"></div>
+    <p style="margin-top:1.5rem;">Leah Mir &nbsp;&middot;&nbsp; <span id="footer-year"></span></p>
+  </footer>
+
+  <!-- Site config must load before the inline script runs -->
+  <script src="site-config.js"></script>
+  <script>
+    (function () {
+      const { name, tagline, sections } = SITE_CONFIG;
+
+      // Hero
+      document.getElementById('hero-name').textContent    = name;
+      document.getElementById('hero-tagline').textContent = tagline;
+      document.getElementById('footer-year').textContent  = new Date().getFullYear();
+
+      // Navigation
+      const navEl = document.getElementById('nav-links');
+      sections.forEach(function (s) {
+        var li = document.createElement('li');
+        var a  = document.createElement('a');
+        a.href        = s.href;
+        a.textContent = s.title;
+        li.appendChild(a);
+        navEl.appendChild(li);
+      });
+
+      // Section cards
+      var gridEl = document.getElementById('section-grid');
+      sections.forEach(function (s) {
+        var card = document.createElement('a');
+        card.href      = s.href;
+        card.className = 'section-card';
+        card.innerHTML =
+          '<span class="section-card__bar" style="background:' + s.accent + '"></span>' +
+          '<p class="section-card__label">' + s.title + '</p>' +
+          '<h2 class="section-card__title">' + s.title + '</h2>' +
+          '<p class="section-card__desc">' + s.description + '</p>';
+        gridEl.appendChild(card);
+      });
+    })();
+  </script>
+
+</body>
+</html>
