@@ -66,10 +66,11 @@
         var card = document.createElement('a');
         card.href      = s.href;
         card.className = 'section-card';
+        card.style.borderLeft = '4px solid ' + s.accent;
         card.innerHTML =
           '<span class="section-card__bar" style="background:' + s.accent + '"></span>' +
           '<p class="section-card__label">' + s.title + '</p>' +
-          '<h2 class="section-card__title">' + s.title + '</h2>' +
+          '<h2 class="section-card__title" style="color:' + s.accent + '">' + s.title + '</h2>' +
           '<p class="section-card__desc">' + s.description + '</p>';
         gridEl.appendChild(card);
       });

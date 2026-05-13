@@ -40,7 +40,7 @@ body {
 
 /* Gradient bar — top and bottom of every page */
 .gradient-bar {
-  height: 4px;
+  height: 6px;
   background: linear-gradient(to right, var(--turquoise), var(--yellow), var(--pink), var(--green));
   width: 100%;
   display: block;
@@ -60,7 +60,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 2px solid var(--gray-200);
+  background: rgba(46, 196, 182, 0.03);
 }
 
 .site-nav__logo {
@@ -68,7 +69,7 @@ body {
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.03em;
-  color: var(--text);
+  color: var(--turquoise);
 }
 
 .site-nav__links {
@@ -121,12 +122,15 @@ body {
 }
 
 .hero__eyebrow {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--turquoise);
   margin-bottom: 1.5rem;
+  background: rgba(46, 196, 182, 0.08);
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
 }
 
 .hero__name {
@@ -177,8 +181,8 @@ body {
 
 .section-card__bar {
   display: block;
-  width: 32px;
-  height: 2px;
+  width: 100%;
+  height: 4px;
   margin-bottom: 1.5rem;
 }
 
@@ -235,6 +239,7 @@ body {
   font-weight: 400;
   line-height: 1.05;
   margin-bottom: 0.5rem;
+  color: var(--turquoise);
 }
 
 .inner-hero p {
